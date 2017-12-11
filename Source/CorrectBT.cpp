@@ -60,9 +60,16 @@ bool CheckCorrectBT(std::string iFile, std::string oFile)
 		}
 		if (command == "min")
 		{
-			std::ofstream outM(oFile, std::ios_base::binary);
-			t.get_min(outM);
+			std::ofstream outM(oFile, std::ios_base::binary | std::ios_base::app);
+			outM <<	t.min() << " ";
 			outM.close();
+		}
+
+		if (command == "max")
+		{
+			std::ofstream outX(oFile, std::ios_base::binary | std::ios_base::app);
+			outX << t.max() << " ";
+			outX.close();
 		}
 	}
 	file.close();
