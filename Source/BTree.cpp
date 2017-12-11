@@ -28,14 +28,24 @@ void BTreeNode::traverse(std::ofstream &fout)
 		C[i]->traverse(fout);
 }
 
-void BTreeNode::get_min(std::ofstream &fout)
+int BTreeNode::get_min()
 {
-	while (leaf == false)
-	{
-		C[0]->get_min(fout);
+
+	if (leaf == false)
+	{ 
+		return C[0] -> get_min();
 	}
-		fout << keys[0] << " ";
-		return;
+		return keys[0];
+}
+
+int BTreeNode::get_max()
+{
+
+	if (leaf == false)
+	{
+		return C[n]->get_max();
+	}
+	return keys[n-1];
 }
 
 BTreeNode *BTreeNode::search(int k)
