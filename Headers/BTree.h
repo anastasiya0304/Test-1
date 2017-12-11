@@ -32,7 +32,9 @@ public:
 	void borrowFromPrev(int idx);
 	void borrowFromNext(int idx);
 	void merge(int idx);
+	int get_min();
 
+	int get_max();
 	friend class BTree;
 };
 
@@ -58,6 +60,15 @@ public:
 		return (root == NULL) ? NULL : root->search(k);
 	}
 	
+	int min()
+	{
+		return root->get_min();
+	}
+
+	int max()
+	{
+		return root->get_max();
+	}
 	void remove(int k);
 
 	void insert(int k);
