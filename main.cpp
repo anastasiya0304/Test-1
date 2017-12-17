@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		if (!CheckCorrect(inFile, outFile))
-			std::cout << "bjib";
+
 	}
 
 	system("pause");
