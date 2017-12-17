@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "Btree.h"
 #include <fstream>
-
+// Constructor for BTreeNode class
 BTreeNode::BTreeNode(int t1, bool leaf1)
 {
 	t = t1;
 	leaf = leaf1;
 
 	keys = new int[2 * t - 1];
+	data = new int[2 * t - 1];
 	C = new BTreeNode *[2 * t];
 
 	n = 0;
@@ -21,7 +22,7 @@ void BTreeNode::traverse(std::ofstream &fout)
 	{
 		if (leaf == false)
 			C[i]->traverse(fout);
-		fout << keys[i] << " ";
+		fout << data[i] << " ";
 	}
 
 	if (leaf == false)
@@ -107,8 +108,11 @@ void BTreeNode::remove(int k)
 void BTreeNode::removeFromLeaf(int idx)
 {
 
-	for (int i = idx + 1; i<n; ++i)
+	for (int i = idx + 1; i < n; ++i)
+	{
 		keys[i - 1] = keys[i];
+		data[i - 1] = data[i];
+	}
 
 	n--;
 
@@ -185,7 +189,10 @@ void BTreeNode::borrowFromPrev(int idx)
 	BTreeNode *sibling = C[idx - 1];
 
 	for (int i = child->n - 1; i >= 0; --i)
+	{
 		child->keys[i + 1] = child->keys[i];
+		child->data[i + 1] = child->data[i];
+	}
 
 	if (!child->leaf)
 	{
@@ -199,6 +206,7 @@ void BTreeNode::borrowFromPrev(int idx)
 		child->C[0] = sibling->C[sibling->n];
 
 	keys[idx - 1] = sibling->keys[sibling->n - 1];
+	data[idx - 1] = sibling->data[sibling->n - 1];
 
 	child->n += 1;
 	sibling->n -= 1;
@@ -214,14 +222,19 @@ void BTreeNode::borrowFromNext(int idx)
 	BTreeNode *sibling = C[idx + 1];
 
 	child->keys[(child->n)] = keys[idx];
+	child->data[(child->n)] = data[idx];
 
 	if (!(child->leaf))
 		child->C[(child->n) + 1] = sibling->C[0];
 
 	keys[idx] = sibling->keys[0];
+	data[idx] = sibling->data[0];
 
-	for (int i = 1; i<sibling->n; ++i)
+	for (int i = 1; i < sibling->n; ++i)
+	{
 		sibling->keys[i - 1] = sibling->keys[i];
+		sibling->data[i - 1] = sibling->data[i];
+	}
 
 	if (!sibling->leaf)
 	{
@@ -241,9 +254,13 @@ void BTreeNode::merge(int idx)
 	BTreeNode *sibling = C[idx + 1];
 
 	child->keys[t - 1] = keys[idx];
+	child->data[t - 1] = data[idx];
 
-	for (int i = 0; i<sibling->n; ++i)
+	for (int i = 0; i < sibling->n; ++i)
+	{
 		child->keys[i + t] = sibling->keys[i];
+		child->data[i + t] = sibling->data[i];
+	}
 
 	if (!child->leaf)
 	{
@@ -251,8 +268,11 @@ void BTreeNode::merge(int idx)
 			child->C[i + t] = sibling->C[i];
 	}
 
-	for (int i = idx + 1; i<n; ++i)
+	for (int i = idx + 1; i < n; ++i)
+	{
 		keys[i - 1] = keys[i];
+		data[i - 1] = data[i];
+	}
 
 	for (int i = idx + 2; i <= n; ++i)
 		C[i - 1] = C[i];
@@ -285,12 +305,13 @@ void BTree::remove(int k)
 	}
 	return;
 }
-void BTree::insert(int k)
+void BTree::insert(int k, int d)
 {
 	if (root == NULL)
 	{
 		root = new BTreeNode(t, true);
 		root->keys[0] = k;  
+		root->data[0] = d;
 		root->n = 1;  
 	}
 	else 
@@ -306,16 +327,16 @@ void BTree::insert(int k)
 			int i = 0;
 			if (s->keys[0] < k)
 				i++;
-			s->C[i]->insertNonFull(k);
+			s->C[i]->insertNonFull(k,d);
 
 			root = s;
 		}
 		else  
-			root->insertNonFull(k);
+			root->insertNonFull(k, d);
 	}
 }
 
-void BTreeNode::insertNonFull(int k)
+void BTreeNode::insertNonFull(int k, int d)
 {
 	int i = n - 1;
 
@@ -324,10 +345,12 @@ void BTreeNode::insertNonFull(int k)
 		while (i >= 0 && keys[i] > k)
 		{
 			keys[i + 1] = keys[i];
+			data[i + 1] = data[i];
 			i--;
 		}
 
 		keys[i + 1] = k;
+		data[i + 1] = d;
 		n = n + 1;
 	}
 	else 
@@ -343,7 +366,7 @@ void BTreeNode::insertNonFull(int k)
 			if (keys[i + 1] < k)
 				i++;
 		}
-		C[i + 1]->insertNonFull(k);
+		C[i + 1]->insertNonFull(k, d);
 	}
 }
 
@@ -354,7 +377,10 @@ void BTreeNode::splitChild(int i, BTreeNode *y)
 	z->n = t - 1;
 
 	for (int j = 0; j < t - 1; j++)
+	{
 		z->keys[j] = y->keys[j + t];
+		z->data[j] = y->data[j + t];
+	}
 
 	if (y->leaf == false)
 	{
@@ -370,9 +396,13 @@ void BTreeNode::splitChild(int i, BTreeNode *y)
 	C[i + 1] = z;
 
 	for (int j = n - 1; j >= i; j--)
+	{
 		keys[j + 1] = keys[j];
+		data[j + 1] = data[j];
+	}
 
 	keys[i] = y->keys[t - 1];
+	data[i] = y->data[t - 1];
 
 	n = n + 1;
 }
