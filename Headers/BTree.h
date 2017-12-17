@@ -6,6 +6,7 @@
 class BTreeNode
 {
 	int *keys;  
+	int *data;
 	int t;      
 	BTreeNode **C; 
 	int n;    
@@ -13,11 +14,15 @@ class BTreeNode
 public:
 	BTreeNode(int _t, bool _leaf);   
 
-	void insertNonFull(int k);
+	void insertNonFull(int k, int d);
 
 	void splitChild(int i, BTreeNode *y);
 
 	void traverse(std::ofstream &fout);
+	
+	int get_min();
+
+	int get_max();
 
 	BTreeNode *search(int k);  
 
@@ -32,9 +37,7 @@ public:
 	void borrowFromPrev(int idx);
 	void borrowFromNext(int idx);
 	void merge(int idx);
-	int get_min();
 
-	int get_max();
 	friend class BTree;
 };
 
@@ -55,11 +58,6 @@ public:
 		if (root != NULL) root->traverse(fout);
 	}
 
-	BTreeNode* search(int k)
-	{
-		return (root == NULL) ? NULL : root->search(k);
-	}
-	
 	int min()
 	{
 		return root->get_min();
@@ -69,7 +67,13 @@ public:
 	{
 		return root->get_max();
 	}
+
+	BTreeNode* search(int k)
+	{
+		return (root == NULL) ? NULL : root->search(k);
+	}
+	
 	void remove(int k);
 
-	void insert(int k);
+	void insert(int k, int d);
 };
