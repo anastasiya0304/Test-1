@@ -4,10 +4,11 @@
 #include <iostream>
 
 //создаем новое дерево, выделяем память 
-struct node* SplayTree::newNode(int key)
+struct node* SplayTree::newNode(int _key, int _data)
 {
 	struct node* f_node = new node;
-	f_node->key = key;
+	f_node->key = _key;
+	f_node->data = _data;
 	f_node->left = NULL;
 	f_node->right = NULL;
 	return f_node;
@@ -93,10 +94,10 @@ struct node* SplayTree::splay(struct node *root, int key)
 }
 
 // Вставка новой вершины
-struct node* SplayTree::insert(struct node *root, int k)
+struct node* SplayTree::insert(struct node *root, int k, int _data)
 {
 	if (root == NULL)
-		return newNode(k);
+		return newNode(k, _data);
 
 	// Проверяем есть ли элемент в дереве
 	root = splay(root, k);
@@ -105,7 +106,7 @@ struct node* SplayTree::insert(struct node *root, int k)
 		return root;
 
 	// создаем новый узел
-	struct node* newnode = newNode(k);
+	struct node* newnode = newNode(k, _data);
 
 	// добавляем элемент
 	if (root->key > k)
@@ -122,22 +123,6 @@ struct node* SplayTree::insert(struct node *root, int k)
 	}
 
 	return newnode;
-}
-
-struct node* SplayTree::readfile(struct node *root, std::string file_name)
-{
-	//открываем файл для чтения
-	std::ifstream file(file_name, std::ios_base::binary);
-
-	while (!file.eof())
-	{
-		int a;
-		file >> a;
-		root = insert(root, a);
-		a = 0;
-	}
-	file.close();
-	return root;
 }
 
 //поиск
@@ -218,7 +203,7 @@ void SplayTree::print(struct node *root, std::ofstream &fout)
 {
 	if (root != NULL)
 	{
-		fout<< root->key << " ";
+		fout<< root->data << " ";
 		print(root->left, fout);
 		print(root->right, fout);
 	}
